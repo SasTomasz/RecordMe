@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".recordandplay.RecordAndPlayFragment">
 
+
+
     <Button
         android:id="@+id/b_rec"
         android:layout_width="wrap_content"
