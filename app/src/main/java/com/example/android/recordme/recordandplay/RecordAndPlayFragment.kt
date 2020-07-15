@@ -1,25 +1,25 @@
 package com.example.android.recordme.recordandplay
 
-import android.app.Application
-import androidx.lifecycle.ViewModelProviders
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.android.recordme.R
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
 
-class RecordAndPlayFragment : Fragment() {
+const val PERM_GRANTED = 123
 
-    companion object {
-        fun newInstance() = RecordAndPlayFragment()
-    }
+class RecordAndPlayFragment : Fragment() {
 
     private var _binding: RecordAndPlayFragmentBinding? = null
     private val binding
         get() = _binding!!
-    private lateinit var viewModelFactory: RecordAndPlayViewModelFactory
     private lateinit var viewModel: RecordAndPlayViewModel
 
     override fun onCreateView(
@@ -32,11 +32,71 @@ class RecordAndPlayFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModelFactory = RecordAndPlayViewModelFactory(requireNotNull(Application()))
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(RecordAndPlayViewModel::class.java)
-        binding.bRec.setOnClickListener { viewModel.onClickRecor() }
+
+        viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
+
+        binding.bRec.setOnClickListener { checkPermissions() }
         binding.bPlay.setOnClickListener { viewModel.onClickStop() }
-        // TODO: Use the ViewModel
     }
 
+    /**
+     * Check permissions and if it is granted start recording and if it is not ask for permissions
+     *
+     * There is (in my opinion) possibility do this more convenient with new Activity 1.2.0-alpha02
+     * see new feature for permissions https://www.youtube.com/watch?v=R3caBPj-6Sg (14:57)
+     * TODO try ask permissions more easily with new feature from jetpack
+     * TODO try move checking permissions to viewmodel
+     */
+    private fun checkPermissions() {
+        if ((ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO))
+            + (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )) == PackageManager.PERMISSION_GRANTED
+        ) {
+            viewModel.onClickRecord(requireContext())
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.RECORD_AUDIO
+                ) || ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            ) {
+                // TODO show some info about why user should
+                //  allow to recording and accessing storage
+                Toast.makeText(
+                    activity,
+                    "Record & Write permissions is require if you want to record audio",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ), PERM_GRANTED
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            PERM_GRANTED -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] + grantResults[1] ==
+                            PackageManager.PERMISSION_GRANTED)
+                ) {
+                    viewModel.onClickRecord(requireContext())
+                }
+            }
+        }
+    }
 }
