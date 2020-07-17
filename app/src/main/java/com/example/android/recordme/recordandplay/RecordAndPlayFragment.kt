@@ -6,11 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.example.android.recordme.R
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
 
 const val PERM_GRANTED = 123
@@ -37,24 +38,24 @@ class RecordAndPlayFragment : Fragment() {
 
         binding.bRec.setOnClickListener { checkPermissions() }
         binding.bPlay.setOnClickListener { viewModel.onClickStop() }
+        // TODO improve data binding
+
+
     }
 
     /**
      * Check permissions and if it is granted start recording and if it is not ask for permissions
-     *
-     * There is (in my opinion) possibility do this more convenient with new Activity 1.2.0-alpha02
-     * see new feature for permissions https://www.youtube.com/watch?v=R3caBPj-6Sg (14:57)
-     * TODO try ask permissions more easily with new feature from jetpack
-     * TODO try move checking permissions to viewmodel
+     * Also checking app should show rationale dialog
      */
     private fun checkPermissions() {
-        if ((ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO))
+        if ((ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO))
             + (ContextCompat.checkSelfPermission(
                 requireActivity(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )) == PackageManager.PERMISSION_GRANTED
         ) {
             viewModel.onClickRecord(requireContext())
+            // TODO add some behavior with permanently denied permissions
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
@@ -64,24 +65,28 @@ class RecordAndPlayFragment : Fragment() {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
             ) {
-                // TODO show some info about why user should
-                //  allow to recording and accessing storage
-                Toast.makeText(
-                    activity,
-                    "Record & Write permissions is require if you want to record audio",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showRationaleDialog(
+                    getString(R.string.rationale_permissions_dialog_title),
+                    getString(R.string.rationale_permissions_dialog_message)
+                )
+            } else {
+                requestPermissions()
             }
 
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ), PERM_GRANTED
-            )
+
         }
     }
+
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(
+            requireActivity(),
+            arrayOf(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), PERM_GRANTED
+        )
+    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -98,5 +103,15 @@ class RecordAndPlayFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun showRationaleDialog(title: String, message: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Ok") { _, _ ->
+                requestPermissions()
+            }
+        builder.create().show()
     }
 }
