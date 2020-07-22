@@ -6,15 +6,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.example.android.recordme.R
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
 
-const val PERM_GRANTED = 123
+const val PERMISSIONS_REQUEST_CODE = 123
 
 class RecordAndPlayFragment : Fragment() {
 
@@ -39,72 +39,12 @@ class RecordAndPlayFragment : Fragment() {
         binding.bRec.setOnClickListener { checkPermissions() }
         binding.bPlay.setOnClickListener { viewModel.onClickStop() }
         // TODO improve data binding
-
-
     }
 
     /**
-     * Check permissions and if it is granted start recording and if it is not ask for permissions
-     * Also checking app should show rationale dialog
+     * Show Alert Dialog with explanation why User should allow permissions.
+     * After click "ok" button request permissions will show
      */
-    private fun checkPermissions() {
-        if ((ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO))
-            + (ContextCompat.checkSelfPermission(
-                requireActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )) == PackageManager.PERMISSION_GRANTED
-        ) {
-            viewModel.onClickRecord(requireContext())
-            // TODO add some behavior with permanently denied permissions
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.RECORD_AUDIO
-                ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-            ) {
-                showRationaleDialog(
-                    getString(R.string.rationale_permissions_dialog_title),
-                    getString(R.string.rationale_permissions_dialog_message)
-                )
-            } else {
-                requestPermissions()
-            }
-
-
-        }
-    }
-
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ), PERM_GRANTED
-        )
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            PERM_GRANTED -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] + grantResults[1] ==
-                            PackageManager.PERMISSION_GRANTED)
-                ) {
-                    viewModel.onClickRecord(requireContext())
-                }
-            }
-        }
-    }
-
     private fun showRationaleDialog(title: String, message: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setTitle(title)
@@ -113,5 +53,66 @@ class RecordAndPlayFragment : Fragment() {
                 requestPermissions()
             }
         builder.create().show()
+    }
+
+    /**
+     * Check permissions and if it is granted start recording and if it is not ask for permissions
+     * Also checking app should show rationale dialog
+     */
+    private fun checkPermissions() {
+        // TODO checking the platfomr Marshmallow >= need runtime permissions
+        when {
+            // check if user has permissions
+            (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO))
+                    + (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )) == PackageManager.PERMISSION_GRANTED -> {
+                // User has permissions
+                viewModel.onClickRecord(requireContext())
+            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ||
+                    shouldShowRequestPermissionRationale(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) -> {
+                // User has denied permissions once but he didn't click "Never Show Again" checkbox
+                showRationaleDialog(
+                    getString(R.string.rationale_permissions_dialog_title),
+                    getString(R.string.rationale_permissions_dialog_message)
+                )
+            }
+
+            else -> {
+                // User has never seen a permission Dialog
+                requestPermissions()
+            }
+        }
+    }
+
+    private fun requestPermissions() {
+        requestPermissions(
+            arrayOf(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), PERMISSIONS_REQUEST_CODE
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (grantResults.isNotEmpty() && grantResults[0] + grantResults[1] ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permissions is now granted
+            Toast.makeText(requireActivity(), "Permissions Granted", Toast.LENGTH_SHORT).show()
+            viewModel.onClickRecord(requireActivity())
+        } else {
+            // Permissions are not granted by User
+            Toast.makeText(requireActivity(), "Permissions Denied", Toast.LENGTH_SHORT).show()
+        }
     }
 }
