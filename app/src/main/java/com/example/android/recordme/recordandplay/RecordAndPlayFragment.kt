@@ -2,6 +2,7 @@ package com.example.android.recordme.recordandplay
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +37,13 @@ class RecordAndPlayFragment : Fragment() {
 
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
 
-        binding.bRec.setOnClickListener { checkPermissions() }
+        binding.bRec.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                checkPermissions()
+            } else {
+                viewModel.onClickRecord(requireContext())
+            }
+        }
         binding.bPlay.setOnClickListener { viewModel.onClickStop() }
         // TODO improve data binding
     }
@@ -60,7 +67,6 @@ class RecordAndPlayFragment : Fragment() {
      * Also checking app should show rationale dialog
      */
     private fun checkPermissions() {
-        // TODO checking the platfomr Marshmallow >= need runtime permissions
         when {
             // check if user has permissions
             (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO))
