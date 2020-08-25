@@ -36,6 +36,7 @@ class RecordAndPlayFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
+        binding.viewModel = viewModel
 
         binding.bRec.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -44,7 +45,6 @@ class RecordAndPlayFragment : Fragment() {
                 viewModel.onClickRecord(requireContext())
             }
         }
-        binding.bPlay.setOnClickListener { viewModel.onClickStop() }
         // TODO improve data binding
     }
 
