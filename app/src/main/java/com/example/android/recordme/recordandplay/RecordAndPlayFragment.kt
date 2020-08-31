@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.example.android.recordme.R
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
+import com.example.android.recordme.utils.RecorderAndPlayer
 
 const val PERMISSIONS_REQUEST_CODE = 123
 
@@ -23,6 +24,7 @@ class RecordAndPlayFragment : Fragment() {
     private val binding
         get() = _binding!!
     private lateinit var viewModel: RecordAndPlayViewModel
+    private val recorderAndPlayer = RecorderAndPlayer()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,14 +40,25 @@ class RecordAndPlayFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
-        binding.bRec.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                checkPermissions()
-            } else {
-                viewModel.onClickRecord(requireContext())
+        viewModel.startRecord.observe(viewLifecycleOwner, {
+            if (it) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    checkPermissions()
+                } else {
+                    recorderAndPlayer.onClickRecord(requireContext())
+                }
+                viewModel.recordStarted()
             }
-        }
-        // TODO improve data binding
+
+        })
+
+        viewModel.stopRecord.observe(viewLifecycleOwner, {
+            if (it) {
+                recorderAndPlayer.onClickPlay()
+                viewModel.recordStopped()
+            }
+
+        })
     }
 
     /**
@@ -75,7 +88,7 @@ class RecordAndPlayFragment : Fragment() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )) == PackageManager.PERMISSION_GRANTED -> {
                 // User has permissions
-                viewModel.onClickRecord(requireContext())
+                recorderAndPlayer.onClickRecord(requireContext())
             }
 
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ||
@@ -115,7 +128,7 @@ class RecordAndPlayFragment : Fragment() {
         ) {
             // Permissions is now granted
             Toast.makeText(requireActivity(), "Permissions Granted", Toast.LENGTH_SHORT).show()
-            viewModel.onClickRecord(requireActivity())
+            recorderAndPlayer.onClickRecord(requireActivity())
         } else {
             // Permissions are not granted by User
             Toast.makeText(requireActivity(), "Permissions Denied", Toast.LENGTH_SHORT).show()

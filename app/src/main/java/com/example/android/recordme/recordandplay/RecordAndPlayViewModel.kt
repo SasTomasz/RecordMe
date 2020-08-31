@@ -1,54 +1,32 @@
 package com.example.android.recordme.recordandplay
 
-import android.content.Context
-import android.media.MediaPlayer
-import android.media.MediaRecorder
-import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.io.File
 
 class RecordAndPlayViewModel : ViewModel() {
-    private var recorder: MediaRecorder? = null
-    private lateinit var audiofile: File
 
-    private fun prepareRecorder(context: Context) {
-        audiofile = File(context.filesDir, "audiotest")
-        recorder = MediaRecorder()
+    private val _startRecord = MutableLiveData<Boolean>()
+    val startRecord: LiveData<Boolean>
+        get() = _startRecord
 
-        recorder?.apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            setOutputFile(audiofile.absolutePath)
-        }
+    private val _stopRecord = MutableLiveData<Boolean>()
+    val stopRecord: LiveData<Boolean>
+        get() = _stopRecord
 
-        try {
-            recorder?.prepare()
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-        }
+    fun onClickRecord() {
+        _startRecord.value = true
     }
 
-    fun onClickRecord(context: Context) {
-        prepareRecorder(context)
-        recorder?.start()
+    fun onClickPlay() {
+        _stopRecord.value = true
     }
 
-    fun onClickStop() {
-        recorder?.stop()
-        recorder?.release()
-        recorder = null
-        play()
+    fun recordStarted() {
+        _startRecord.value = false
     }
 
-    private fun play() {
-        val mediaPlayer = MediaPlayer()
-        try {
-            mediaPlayer.setDataSource(audiofile.absolutePath)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-        } catch (e: Exception) {
-            Log.e("RecordAndPlayViewModel", "Problem with mediaPlayer")
-        }
+    fun recordStopped() {
+        _stopRecord.value = false
     }
 }
