@@ -12,7 +12,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.R
+import com.example.android.recordme.adapters.MyAdapter
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
 import com.example.android.recordme.utils.RecorderAndPlayer
 
@@ -25,6 +28,11 @@ class RecordAndPlayFragment : Fragment() {
         get() = _binding!!
     private lateinit var viewModel: RecordAndPlayViewModel
     private val recorderAndPlayer = RecorderAndPlayer()
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +48,7 @@ class RecordAndPlayFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
+        // start and stop recording audio
         viewModel.startRecord.observe(viewLifecycleOwner, {
             if (it) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -59,6 +68,18 @@ class RecordAndPlayFragment : Fragment() {
             }
 
         })
+
+        // recyclerview
+        viewManager = LinearLayoutManager(requireContext())
+        viewAdapter = MyAdapter(viewModel.listOfRecordings)
+
+        recyclerView = binding.recordingsList.apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = viewAdapter
+            // todo continue make recycler
+        }
+
     }
 
     /**

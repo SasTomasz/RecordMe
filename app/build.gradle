@@ -54,5 +54,9 @@ dependencies {
     // For RequestPermission
     implementation "androidx.activity:activity-ktx:$activity_version"
 
+    // recyclerview
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+
+
 
 }

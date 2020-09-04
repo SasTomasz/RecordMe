@@ -14,6 +14,10 @@ class RecordAndPlayViewModel : ViewModel() {
     val stopRecord: LiveData<Boolean>
         get() = _stopRecord
 
+    private var _listOfRecordings = listOf("abc", "def", "ghi")
+    val listOfRecordings
+        get() = _listOfRecordings
+
     fun onClickRecord() {
         _startRecord.value = true
     }
