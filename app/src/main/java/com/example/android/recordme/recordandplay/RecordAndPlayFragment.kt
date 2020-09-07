@@ -63,7 +63,7 @@ class RecordAndPlayFragment : Fragment() {
 
         viewModel.stopRecord.observe(viewLifecycleOwner, {
             if (it) {
-                recorderAndPlayer.onClickPlay()
+                recorderAndPlayer.onClickStop()
                 viewModel.recordStopped()
             }
 

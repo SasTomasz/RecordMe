@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.databinding.ListOfRecordingsBinding
 
 class MyAdapter(private val myDataset: List<String>) :
-    RecyclerView.Adapter<MyAdapter.MyViewHolder>() { //todo check sleep app and remeberer hot to use recyclerview
+    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
     class MyViewHolder(val binding: ListOfRecordingsBinding) : RecyclerView.ViewHolder(binding.root)
 

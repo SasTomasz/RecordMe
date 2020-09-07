@@ -22,7 +22,7 @@ class RecordAndPlayViewModel : ViewModel() {
         _startRecord.value = true
     }
 
-    fun onClickPlay() {
+    fun onClickStop() {
         _stopRecord.value = true
     }
 
