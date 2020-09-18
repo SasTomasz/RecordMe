@@ -12,15 +12,9 @@ data class Record(
     val recordPath: String,
     @ColumnInfo(name = "users_name")
     val usersName: String = "Unknown"
-) {
+)
+// TODO 02 Create multiple audio files:
+//  - Add new files and its metadata every time user click Rec button
+//  - Set recyclerview to show all recordings
+//  - Add new feature -> when user click current name, he will hear record
 
-    // this causes problem with build app "A failure occurred while executing org.jetbrains.kotlin.gradle.internal.KaptExecution"
-//    @ColumnInfo(name = "default_name")
-//    private val defaultName: String
-//
-//    init {
-//        val cal = Calendar.getInstance()
-//        val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-//        defaultName = df.format(cal.time)
-//    }
-}  // todo continue create multiple audio files

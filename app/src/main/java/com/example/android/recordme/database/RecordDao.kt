@@ -9,7 +9,6 @@ import com.example.android.recordme.data.Record
 
 @Dao
 interface RecordDao {
-    //todo continue create roomdatabase and it's component
 
     @Insert
     fun insertAll(vararg records: Record)

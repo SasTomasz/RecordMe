@@ -2,7 +2,6 @@ package com.example.android.recordme.recordandplay
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
-import com.example.android.recordme.utils.RecorderAndPlayer
 
 const val PERMISSIONS_REQUEST_CODE = 123
 
@@ -27,7 +25,6 @@ class RecordAndPlayFragment : Fragment() {
     private val binding
         get() = _binding!!
     private lateinit var viewModel: RecordAndPlayViewModel
-    private val recorderAndPlayer = RecorderAndPlayer()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -48,26 +45,34 @@ class RecordAndPlayFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
+        // checking if there is need of checking permissions
+        viewModel.checkPermissions.observe(viewLifecycleOwner, {
+            if (it) {
+                checkPermissions()
+                viewModel.permissionsChecked()
+            }
+        })
+
         // start and stop recording audio
-        viewModel.startRecord.observe(viewLifecycleOwner, {
-            if (it) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    checkPermissions()
-                } else {
-                    recorderAndPlayer.onClickRecord(requireContext())
-                }
-                viewModel.recordStarted()
-            }
-
-        })
-
-        viewModel.stopRecord.observe(viewLifecycleOwner, {
-            if (it) {
-                recorderAndPlayer.onClickStop()
-                viewModel.recordStopped()
-            }
-
-        })
+//        viewModel.startRecord.observe(viewLifecycleOwner, {
+//            if (it) {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    checkPermissions()
+//                } else {
+//                    recorderAndPlayer.onClickRecord(requireContext())
+//                }
+//                viewModel.recordStarted()
+//            }
+//
+//        })
+//
+//        viewModel.stopRecord.observe(viewLifecycleOwner, {
+//            if (it) {
+//                recorderAndPlayer.onClickStop()
+//                viewModel.recordStopped()
+//            }
+//
+//        })
 
         // recyclerview
         viewManager = LinearLayoutManager(requireContext())
@@ -77,7 +82,6 @@ class RecordAndPlayFragment : Fragment() {
             setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
-            // todo continue make recycler
         }
 
     }
@@ -109,7 +113,8 @@ class RecordAndPlayFragment : Fragment() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )) == PackageManager.PERMISSION_GRANTED -> {
                 // User has permissions
-                recorderAndPlayer.onClickRecord(requireContext())
+                viewModel.permissionsGranted()
+                viewModel.onClickRecord()
             }
 
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ||
@@ -149,7 +154,8 @@ class RecordAndPlayFragment : Fragment() {
         ) {
             // Permissions is now granted
             Toast.makeText(requireActivity(), "Permissions Granted", Toast.LENGTH_SHORT).show()
-            recorderAndPlayer.onClickRecord(requireActivity())
+            viewModel.permissionsGranted()
+            viewModel.onClickRecord()
         } else {
             // Permissions are not granted by User
             Toast.makeText(requireActivity(), "Permissions Denied", Toast.LENGTH_SHORT).show()
