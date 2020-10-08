@@ -25,5 +25,8 @@ class MyAdapter(private val myDataset: List<String>) :
     override fun getItemCount(): Int {
         return myDataset.size
     }
+// TODO 04 Make recyclerview working:
+//  - Set recyclerview to show all recordings
+//  - Add new feature -> when user click current name, he will hear record
 
 }

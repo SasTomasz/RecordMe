@@ -45,6 +45,11 @@ class RecordAndPlayFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
+        viewModel.recordings.observe(viewLifecycleOwner, {
+            it?.let {
+            }
+        })
+
         // checking if there is need of checking permissions
         viewModel.checkPermissions.observe(viewLifecycleOwner, {
             if (it) {
@@ -52,27 +57,6 @@ class RecordAndPlayFragment : Fragment() {
                 viewModel.permissionsChecked()
             }
         })
-
-        // start and stop recording audio
-//        viewModel.startRecord.observe(viewLifecycleOwner, {
-//            if (it) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    checkPermissions()
-//                } else {
-//                    recorderAndPlayer.onClickRecord(requireContext())
-//                }
-//                viewModel.recordStarted()
-//            }
-//
-//        })
-//
-//        viewModel.stopRecord.observe(viewLifecycleOwner, {
-//            if (it) {
-//                recorderAndPlayer.onClickStop()
-//                viewModel.recordStopped()
-//            }
-//
-//        })
 
         // recyclerview
         viewManager = LinearLayoutManager(requireContext())
@@ -114,7 +98,6 @@ class RecordAndPlayFragment : Fragment() {
             )) == PackageManager.PERMISSION_GRANTED -> {
                 // User has permissions
                 viewModel.permissionsGranted()
-                viewModel.onClickRecord()
             }
 
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ||
@@ -126,6 +109,10 @@ class RecordAndPlayFragment : Fragment() {
                     getString(R.string.rationale_permissions_dialog_title),
                     getString(R.string.rationale_permissions_dialog_message)
                 )
+
+                // TODO 03 Add some message when user clicked "Never Show Again Button":
+                //  - Add some Toast with info how to change this denied permissions
+                //  - Test this case on device
             }
 
             else -> {
@@ -154,8 +141,6 @@ class RecordAndPlayFragment : Fragment() {
         ) {
             // Permissions is now granted
             Toast.makeText(requireActivity(), "Permissions Granted", Toast.LENGTH_SHORT).show()
-            viewModel.permissionsGranted()
-            viewModel.onClickRecord()
         } else {
             // Permissions are not granted by User
             Toast.makeText(requireActivity(), "Permissions Denied", Toast.LENGTH_SHORT).show()

@@ -6,9 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.android.recordme.data.Record
 
-@Database(entities = arrayOf(Record::class), version = 1, exportSchema = false)
+@Database(entities = [Record::class], version = 1, exportSchema = false)
 abstract class MainDatabase : RoomDatabase() {
-    abstract fun RecordDao(): RecordDao
+    abstract val recordDao: RecordDao
 
     companion object {
         // Singleton prevents multiple instances of database opening at the
@@ -16,7 +16,7 @@ abstract class MainDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: MainDatabase? = null
 
-        fun getDatabase(context: Context): MainDatabase {
+        fun getInstance(context: Context): MainDatabase {
             val tempInstance = INSTANCE
             if (tempInstance != null) {
                 return tempInstance
