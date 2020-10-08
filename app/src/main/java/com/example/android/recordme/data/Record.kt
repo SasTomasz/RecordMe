@@ -15,7 +15,3 @@ data class Record(
     @ColumnInfo(name = "users_name")
     var usersName: String = "User's name"
 )
-// TODO 02 Create multiple audio files:
-//  - Add Stop button - it should show when record is still on
-//  - After user clicked stop button it change to rec and save all data in database
-

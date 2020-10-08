@@ -109,10 +109,6 @@ class RecordAndPlayFragment : Fragment() {
                     getString(R.string.rationale_permissions_dialog_title),
                     getString(R.string.rationale_permissions_dialog_message)
                 )
-
-                // TODO 03 Add some message when user clicked "Never Show Again Button":
-                //  - Add some Toast with info how to change this denied permissions
-                //  - Test this case on device
             }
 
             else -> {
@@ -141,9 +137,21 @@ class RecordAndPlayFragment : Fragment() {
         ) {
             // Permissions is now granted
             Toast.makeText(requireActivity(), "Permissions Granted", Toast.LENGTH_SHORT).show()
+        } else if (!shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ||
+            !shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        ) {
+            // User permanently denied permissions
+            Toast.makeText(
+                requireActivity(), "Permissions Denied! Change device settings!",
+                Toast.LENGTH_SHORT
+            ).show()
         } else {
             // Permissions are not granted by User
             Toast.makeText(requireActivity(), "Permissions Denied", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // TODO 05 Check whether another recording app don't working at the same time:
+    //  - Check the microphone or media recorder is free
+    //  - Show Toast with corresponding message
 }

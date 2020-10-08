@@ -42,6 +42,10 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     val checkPermissions: LiveData<Boolean>
         get() = _checkPermissions
 
+    private val _recordingIsInProgress = MutableLiveData<Boolean>()
+    val recordingIsInProgress: LiveData<Boolean>
+        get() = _recordingIsInProgress
+
     fun onClickRecord() {
         checkPermissions()
     }
