@@ -2,31 +2,58 @@ package com.example.android.recordme.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.android.recordme.data.Record
 import com.example.android.recordme.databinding.ListOfRecordingsBinding
 
-class MyAdapter(private val myDataset: List<String>) :
-    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+class MyAdapter : ListAdapter<Record, MyAdapter.MyViewHolder>(RecordDiffCallback()) {
 
-    class MyViewHolder(val binding: ListOfRecordingsBinding) : RecyclerView.ViewHolder(binding.root)
+    class MyViewHolder private constructor(val binding: ListOfRecordingsBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Record) {
+            binding.recordItem.text = item.recordName
+        }
+
+        companion object {
+            fun from(parent: ViewGroup): MyViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+
+                val binding = ListOfRecordingsBinding
+                    .inflate(layoutInflater, parent, false)
+
+                return MyViewHolder(binding)
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = ListOfRecordingsBinding
-            .inflate(inflater, parent, false)
-        return MyViewHolder(binding)
+        return MyViewHolder.from(parent)
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val item = myDataset[position]
-        holder.binding.recordItem.text = item
+        val item = getItem(position)
+        holder.bind(item)
     }
 
-    override fun getItemCount(): Int {
-        return myDataset.size
-    }
 // TODO 04 Make recyclerview working:
-//  - Set recyclerview to show all recordings
 //  - Add new feature -> when user click current name, he will hear record
 
+}
+
+/**
+ * Callback for calculating the diff between two non-null items in a list.
+ *
+ * Used by ListAdapter to calculate the minumum number of changes between and old list and a new
+ * list that's been passed to `submitList`.
+ */
+class RecordDiffCallback : DiffUtil.ItemCallback<Record>() {
+    override fun areItemsTheSame(oldItem: Record, newItem: Record): Boolean {
+        return oldItem.recordId == newItem.recordId
+    }
+
+    override fun areContentsTheSame(oldItem: Record, newItem: Record): Boolean {
+        return oldItem == newItem
+    }
 }

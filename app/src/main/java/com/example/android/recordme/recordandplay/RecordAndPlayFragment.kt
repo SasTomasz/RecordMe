@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
@@ -45,11 +45,6 @@ class RecordAndPlayFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
-        viewModel.recordings.observe(viewLifecycleOwner, {
-            it?.let {
-            }
-        })
-
         // checking if there is need of checking permissions
         viewModel.checkPermissions.observe(viewLifecycleOwner, {
             if (it) {
@@ -59,14 +54,15 @@ class RecordAndPlayFragment : Fragment() {
         })
 
         // recyclerview
-        viewManager = LinearLayoutManager(requireContext())
-        viewAdapter = MyAdapter(viewModel.listOfRecordings)
 
-        recyclerView = binding.recordingsList.apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
+        val adapter = MyAdapter()
+        binding.recordingsList.adapter = adapter
+        viewModel.recordings.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                adapter.submitList(it)
+            }
+        })
+
 
     }
 

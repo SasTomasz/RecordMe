@@ -24,7 +24,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     private val tag = this.javaClass.simpleName
     private val databaseDao: RecordDao = MainDatabase.getInstance(application).recordDao
     private val repository: Repository = Repository(databaseDao)
-    val recordings = repository.recordings
+    val recordings = repository.recordingsLiveData
     private lateinit var calendar: Calendar
     private val mediaPlayer = MediaPlayer()
     private var record: Record? = null
@@ -45,6 +45,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     private val _recordingIsInProgress = MutableLiveData<Boolean>()
     val recordingIsInProgress: LiveData<Boolean>
         get() = _recordingIsInProgress
+
 
     fun onClickRecord() {
         checkPermissions()
@@ -132,6 +133,11 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         prepareRecorder()
         recorder?.start()
     }
+
+    // TODO 06 Refactor viewModel:
+    //  - Move all record and play logic to separate class
+    //      * record logic
+    //      * play logic
 
     private fun saveRecordMetadata(record: Record) {
         uiScope.launch {

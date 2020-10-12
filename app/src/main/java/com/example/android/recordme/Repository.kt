@@ -4,5 +4,5 @@ import com.example.android.recordme.database.RecordDao
 
 class Repository(recordDao: RecordDao) {
 
-    val recordings = recordDao.getAllRecords()
+    val recordingsLiveData = recordDao.getAllRecords()
 }
