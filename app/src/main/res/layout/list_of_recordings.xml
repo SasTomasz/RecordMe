@@ -8,11 +8,16 @@
         <variable
             name="record"
             type="com.example.android.recordme.data.Record" />
+
+        <variable
+            name="clickListener"
+            type="com.example.android.recordme.adapters.RecordClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> clickListener.onClick(record)}">
 
         <TextView
             android:id="@+id/record_item"
@@ -25,10 +30,12 @@
             android:gravity="center"
             android:padding="16dp"
             android:textSize="24sp"
+            android:foreground="?android:attr/selectableItemBackground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:text="@{record.recordName}"
             tools:text="2020-09-04" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

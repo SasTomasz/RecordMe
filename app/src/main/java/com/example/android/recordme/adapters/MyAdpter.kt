@@ -8,12 +8,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.data.Record
 import com.example.android.recordme.databinding.ListOfRecordingsBinding
 
-class MyAdapter : ListAdapter<Record, MyAdapter.MyViewHolder>(RecordDiffCallback()) {
+class MyAdapter(val clickListener: RecordClickListener) :
+    ListAdapter<Record, MyAdapter.MyViewHolder>(RecordDiffCallback()) {
 
     class MyViewHolder private constructor(val binding: ListOfRecordingsBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Record) {
-            binding.recordItem.text = item.recordName
+        fun bind(item: Record, clickListener: RecordClickListener) {
+            binding.record = item
+            binding.clickListener = clickListener
+            binding.executePendingBindings()
         }
 
         companion object {
@@ -34,7 +37,7 @@ class MyAdapter : ListAdapter<Record, MyAdapter.MyViewHolder>(RecordDiffCallback
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
+        holder.bind(item, clickListener)
     }
 
 // TODO 04 Make recyclerview working:
@@ -56,4 +59,8 @@ class RecordDiffCallback : DiffUtil.ItemCallback<Record>() {
     override fun areContentsTheSame(oldItem: Record, newItem: Record): Boolean {
         return oldItem == newItem
     }
+}
+
+class RecordClickListener(val clickListener: (recordId: Int) -> Unit) {
+    fun onClick(record: Record) = clickListener(record.recordId)
 }

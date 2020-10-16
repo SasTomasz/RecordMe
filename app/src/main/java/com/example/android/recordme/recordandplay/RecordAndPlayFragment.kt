@@ -10,11 +10,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
+import com.example.android.recordme.adapters.RecordClickListener
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
 
 const val PERMISSIONS_REQUEST_CODE = 123
@@ -54,15 +54,15 @@ class RecordAndPlayFragment : Fragment() {
         })
 
         // recyclerview
-
-        val adapter = MyAdapter()
+        val adapter = MyAdapter(RecordClickListener { recordId ->
+            Toast.makeText(context, "$recordId", Toast.LENGTH_SHORT).show()
+        })
         binding.recordingsList.adapter = adapter
-        viewModel.recordings.observe(viewLifecycleOwner, Observer {
+        viewModel.recordings.observe(viewLifecycleOwner, {
             it?.let {
                 adapter.submitList(it)
             }
         })
-
 
     }
 
