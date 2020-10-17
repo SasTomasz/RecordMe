@@ -19,32 +19,23 @@ import java.util.*
 
 class RecordAndPlayViewModel(application: Application) : AndroidViewModel(application) {
     private var recorder: MediaRecorder? = null
-    private lateinit var audiofile: File
     private var permissionsGranted = false
     private val tag = this.javaClass.simpleName
     private val databaseDao: RecordDao = MainDatabase.getInstance(application).recordDao
     private val repository: Repository = Repository(databaseDao)
     val recordings = repository.recordingsLiveData
     private lateinit var calendar: Calendar
-    private val mediaPlayer = MediaPlayer()
     private var record: Record? = null
+    private var mediaPlayer = MediaPlayer()
 
 
     // Coroutines
     val viewModeljob = Job()
     val uiScope = CoroutineScope(Dispatchers.Main + viewModeljob)
 
-    private var _listOfRecordings = listOf("abc", "def", "ghi")
-    val listOfRecordings
-        get() = _listOfRecordings
-
     private val _checkPermissions = MutableLiveData<Boolean>()
     val checkPermissions: LiveData<Boolean>
         get() = _checkPermissions
-
-    private val _recordingIsInProgress = MutableLiveData<Boolean>()
-    val recordingIsInProgress: LiveData<Boolean>
-        get() = _recordingIsInProgress
 
 
     fun onClickRecord() {
@@ -70,7 +61,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         record = Record(recordPath = getDataAndTime())
         saveRecordMetadata(record!!)
 
-        audiofile = File(getApplication<Application>().filesDir, record!!.recordName)
+        val audiofile = File(getApplication<Application>().filesDir, record!!.recordName)
         recorder = MediaRecorder()
 
         Log.i(tag, "audiofile path: ${audiofile.absolutePath}")
@@ -97,17 +88,23 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         return stringData
     }
 
-    private fun play() {
+    fun play(record: Record) {
+        mediaPlayer.reset()
+        val audiofile = File(getApplication<Application>().filesDir, record.recordName)
+
         try {
             Log.i("RecordAndPlayViewModel", "file path = ${audiofile.absolutePath}")
             mediaPlayer.setDataSource(audiofile.absolutePath)
             mediaPlayer.prepare()
             mediaPlayer.start()
         } catch (e: Exception) {
-            Log.e("RecordAndPlayViewModel", "Problem with mediaPlayer")
+            Log.e("RecordAndPlayViewModel", "Problem with mediaPlayer ${e.cause.toString()}")
+
         }
 
-        mediaPlayer.setOnCompletionListener { mediaPlayer.release() }
+        mediaPlayer.setOnCompletionListener {
+            mediaPlayer.release()
+        }
     }
 
     private fun checkPermissions() {
@@ -151,17 +148,9 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    private fun updateRecordMetadata() {
-        uiScope.launch {
-//            recordDao.updateRecord(record!!)
-            record = null
-        }
-    }
-
     override fun onCleared() {
         super.onCleared()
         recorder?.release()
-        mediaPlayer.release()
         uiScope.cancel()
     }
 

@@ -40,9 +40,6 @@ class MyAdapter(val clickListener: RecordClickListener) :
         holder.bind(item, clickListener)
     }
 
-// TODO 04 Make recyclerview working:
-//  - Add new feature -> when user click current name, he will hear record
-
 }
 
 /**
@@ -61,6 +58,6 @@ class RecordDiffCallback : DiffUtil.ItemCallback<Record>() {
     }
 }
 
-class RecordClickListener(val clickListener: (recordId: Int) -> Unit) {
-    fun onClick(record: Record) = clickListener(record.recordId)
+class RecordClickListener(val clickListener: (record: Record) -> Unit) {
+    fun onClick(record: Record) = clickListener(record)
 }

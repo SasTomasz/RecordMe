@@ -54,8 +54,9 @@ class RecordAndPlayFragment : Fragment() {
         })
 
         // recyclerview
-        val adapter = MyAdapter(RecordClickListener { recordId ->
-            Toast.makeText(context, "$recordId", Toast.LENGTH_SHORT).show()
+        val adapter = MyAdapter(RecordClickListener { record ->
+            Toast.makeText(context, "${record.recordId}", Toast.LENGTH_SHORT).show()
+            viewModel.play(record)
         })
         binding.recordingsList.adapter = adapter
         viewModel.recordings.observe(viewLifecycleOwner, {
@@ -122,6 +123,11 @@ class RecordAndPlayFragment : Fragment() {
             ), PERMISSIONS_REQUEST_CODE
         )
     }
+
+    // TODO 07 Resolve all warnings and errors:
+    //  - See warnings from build time
+    //  - See warnings in code
+    //  - See warnings in runtime
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
