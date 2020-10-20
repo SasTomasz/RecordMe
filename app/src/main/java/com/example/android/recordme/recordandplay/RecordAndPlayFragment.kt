@@ -11,7 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.RecyclerView
 import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
 import com.example.android.recordme.adapters.RecordClickListener
@@ -25,11 +24,6 @@ class RecordAndPlayFragment : Fragment() {
     private val binding
         get() = _binding!!
     private lateinit var viewModel: RecordAndPlayViewModel
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +44,14 @@ class RecordAndPlayFragment : Fragment() {
             if (it) {
                 checkPermissions()
                 viewModel.permissionsChecked()
+            }
+        })
+
+        // checking if there is need of showing error message
+        viewModel.errorMessage.observe(viewLifecycleOwner, { message ->
+            message?.let {
+                Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+                viewModel.errorMessageShowed()
             }
         })
 
@@ -153,7 +155,5 @@ class RecordAndPlayFragment : Fragment() {
         }
     }
 
-    // TODO 05 Check whether another recording app don't working at the same time:
-    //  - Check the microphone or media recorder is free
-    //  - Show Toast with corresponding message
+
 }

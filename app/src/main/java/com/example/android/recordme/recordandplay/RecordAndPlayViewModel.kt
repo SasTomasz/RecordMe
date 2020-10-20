@@ -37,6 +37,10 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     val checkPermissions: LiveData<Boolean>
         get() = _checkPermissions
 
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String>
+        get() = _errorMessage
+
 
     fun onClickRecord() {
         checkPermissions()
@@ -44,6 +48,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
     fun onClickStop() {
         recorder?.stop()
+        saveRecordMetadata(record!!)
         recorder?.release()
         recorder = null
         record!!.usersName = getDataAndTime()
@@ -58,9 +63,12 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private fun prepareRecorder() {
-        record = Record(recordPath = getDataAndTime())
-        saveRecordMetadata(record!!)
+        // TODO 08 Figure out if it's possible to check microphone status before
+        //  MediaRecorder.prepare()
+        //  - If it's possible check it before
+        //  - Move error message to that check
 
+        record = Record(recordPath = getDataAndTime())
         val audiofile = File(getApplication<Application>().filesDir, record!!.recordName)
         recorder = MediaRecorder()
 
@@ -77,6 +85,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
             recorder?.prepare()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
+            Log.e(tag, "prepareRcorder() fail")
         }
     }
 
@@ -128,7 +137,14 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
     private fun startRecord() {
         prepareRecorder()
-        recorder?.start()
+        try {
+            recorder?.start()
+
+        } catch (e: java.lang.IllegalStateException) {
+            Log.e(tag, "MediaRecorder.start() fail")
+            makeErrorMessage("Another app use Your microphone. Please check it out")
+            // todo inform user about another app use microphone
+        }
     }
 
     // TODO 06 Refactor viewModel:
@@ -154,5 +170,27 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         uiScope.cancel()
     }
 
+    /**
+     * Create error message to user
+     */
+    private fun makeErrorMessage(message: String) {
+        _errorMessage.value = message
+    }
 
+    /**
+     * User showed error message
+     */
+    fun errorMessageShowed() {
+        _errorMessage.value = null
+    }
 }
+
+// TODO 09: Upgrade buttons behavior
+//  - Button "STOP" is available only when user record something
+//  - Add some play icon to every item in recycler to inform user there is possibility to play sound
+
+// TODO 10: Add Settings menu:
+//  - Add new activity settings
+//  - Add new button in options menu
+//  - When user click settings in options menu move him to settings activity
+//  - In options menu add feature -> Stop or pause recording when calls income or block income calls
