@@ -2,7 +2,6 @@ package com.example.android.recordme.recordandplay
 
 import android.app.Application
 import android.media.MediaPlayer
-import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -12,21 +11,20 @@ import com.example.android.recordme.Repository
 import com.example.android.recordme.data.Record
 import com.example.android.recordme.database.MainDatabase
 import com.example.android.recordme.database.RecordDao
+import com.example.android.recordme.utils.Recorder
 import kotlinx.coroutines.*
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
+import java.io.IOException
 
 class RecordAndPlayViewModel(application: Application) : AndroidViewModel(application) {
-    private var recorder: MediaRecorder? = null
     private var permissionsGranted = false
     private val tag = this.javaClass.simpleName
     private val databaseDao: RecordDao = MainDatabase.getInstance(application).recordDao
     private val repository: Repository = Repository(databaseDao)
     val recordings = repository.recordingsLiveData
-    private lateinit var calendar: Calendar
     private var record: Record? = null
-    private var mediaPlayer = MediaPlayer()
+    private lateinit var myRecorder: Recorder
+    private var mediaPlayer: MediaPlayer? = MediaPlayer()
 
 
     // Coroutines
@@ -47,72 +45,43 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     }
 
     fun onClickStop() {
-        recorder?.stop()
+        record = myRecorder.stopRecord()
         saveRecordMetadata(record!!)
-        recorder?.release()
-        recorder = null
-        record!!.usersName = getDataAndTime()
-//        updateRecordMetadata()
-        val listSize = recordings.value?.size
-        Log.i(tag, "Example Live Data: $listSize")
-        if (listSize != null && listSize >= 3) {
-            Log.i(tag, "Last LiveData: ${recordings.value?.get(listSize.minus(1))?.recordPath}")
-            Log.i(tag, "Before LiveData: ${recordings.value?.get(listSize.minus(2))?.recordPath}")
-            Log.i(tag, "Before LiveData: ${recordings.value?.get(listSize.minus(3))?.recordPath}")
-        }
     }
 
-    private fun prepareRecorder() {
-        // TODO 08 Figure out if it's possible to check microphone status before
-        //  MediaRecorder.prepare()
-        //  - If it's possible check it before
-        //  - Move error message to that check
-
-        record = Record(recordPath = getDataAndTime())
-        val audiofile = File(getApplication<Application>().filesDir, record!!.recordName)
-        recorder = MediaRecorder()
-
-        Log.i(tag, "audiofile path: ${audiofile.absolutePath}")
-
-        recorder?.apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            setOutputFile(audiofile.absolutePath)
-        }
-
-        try {
-            recorder?.prepare()
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-            Log.e(tag, "prepareRcorder() fail")
-        }
-    }
-
-    private fun getDataAndTime(): String {
-        calendar = Calendar.getInstance()
-        val data = SimpleDateFormat("yyyy-MM-dd-HH-mm")
-        val stringData = data.format(calendar.time)
-        Log.i(tag, "string time is: $stringData")
-        return stringData
-    }
 
     fun play(record: Record) {
-        mediaPlayer.reset()
+        try {
+            if (mediaPlayer != null) {
+                mediaPlayer?.reset()
+            }
+        } catch (e: IllegalStateException) {
+            Log.e(tag, e.message ?: "Problem with reset()")
+        }
+
         val audiofile = File(getApplication<Application>().filesDir, record.recordName)
 
         try {
+            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+            mediaPlayer?.setDataSource(audiofile.absolutePath)
+        } catch (illegalArgumentException: IllegalStateException) {
+            Log.e(tag, "IllegalStateException in MediaPlayer.setDataSource()")
+        } catch (ioException: IOException) {
+            Log.e(tag, "IOException in MediaPlayer.setDataSource()")
+        }
+
+
+        try {
             Log.i("RecordAndPlayViewModel", "file path = ${audiofile.absolutePath}")
-            mediaPlayer.setDataSource(audiofile.absolutePath)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+            mediaPlayer?.prepare()
+            mediaPlayer?.start()
         } catch (e: Exception) {
             Log.e("RecordAndPlayViewModel", "Problem with mediaPlayer ${e.cause.toString()}")
 
         }
-
-        mediaPlayer.setOnCompletionListener {
-            mediaPlayer.release()
+        mediaPlayer?.setOnCompletionListener {
+            mediaPlayer?.release()
+            mediaPlayer = null
         }
     }
 
@@ -136,15 +105,9 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private fun startRecord() {
-        prepareRecorder()
-        try {
-            recorder?.start()
-
-        } catch (e: java.lang.IllegalStateException) {
-            Log.e(tag, "MediaRecorder.start() fail")
-            makeErrorMessage("Another app use Your microphone. Please check it out")
-            // todo inform user about another app use microphone
-        }
+        myRecorder = Recorder(getApplication<Application>())
+        val errorMessage: String? = myRecorder.startRecord()
+        if (errorMessage != null) makeErrorMessage(errorMessage)
     }
 
     // TODO 06 Refactor viewModel:
@@ -166,8 +129,8 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
     override fun onCleared() {
         super.onCleared()
-        recorder?.release()
         uiScope.cancel()
+        myRecorder.releaseRecorder()
     }
 
     /**
