@@ -1,9 +1,7 @@
 package com.example.android.recordme.recordandplay
 
 import android.app.Application
-import android.media.MediaPlayer
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,25 +9,23 @@ import com.example.android.recordme.Repository
 import com.example.android.recordme.data.Record
 import com.example.android.recordme.database.MainDatabase
 import com.example.android.recordme.database.RecordDao
+import com.example.android.recordme.utils.Player
 import com.example.android.recordme.utils.Recorder
 import kotlinx.coroutines.*
-import java.io.File
-import java.io.IOException
 
 class RecordAndPlayViewModel(application: Application) : AndroidViewModel(application) {
     private var permissionsGranted = false
-    private val tag = this.javaClass.simpleName
     private val databaseDao: RecordDao = MainDatabase.getInstance(application).recordDao
     private val repository: Repository = Repository(databaseDao)
     val recordings = repository.recordingsLiveData
     private var record: Record? = null
-    private lateinit var myRecorder: Recorder
-    private var mediaPlayer: MediaPlayer? = MediaPlayer()
+    private var myRecorder: Recorder = Recorder(getApplication<Application>())
+    private val player: Player = Player(getApplication<Application>())
 
 
     // Coroutines
-    val viewModeljob = Job()
-    val uiScope = CoroutineScope(Dispatchers.Main + viewModeljob)
+    private val viewModeljob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModeljob)
 
     private val _checkPermissions = MutableLiveData<Boolean>()
     val checkPermissions: LiveData<Boolean>
@@ -51,38 +47,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
 
     fun play(record: Record) {
-        try {
-            if (mediaPlayer != null) {
-                mediaPlayer?.reset()
-            }
-        } catch (e: IllegalStateException) {
-            Log.e(tag, e.message ?: "Problem with reset()")
-        }
-
-        val audiofile = File(getApplication<Application>().filesDir, record.recordName)
-
-        try {
-            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
-            mediaPlayer?.setDataSource(audiofile.absolutePath)
-        } catch (illegalArgumentException: IllegalStateException) {
-            Log.e(tag, "IllegalStateException in MediaPlayer.setDataSource()")
-        } catch (ioException: IOException) {
-            Log.e(tag, "IOException in MediaPlayer.setDataSource()")
-        }
-
-
-        try {
-            Log.i("RecordAndPlayViewModel", "file path = ${audiofile.absolutePath}")
-            mediaPlayer?.prepare()
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            Log.e("RecordAndPlayViewModel", "Problem with mediaPlayer ${e.cause.toString()}")
-
-        }
-        mediaPlayer?.setOnCompletionListener {
-            mediaPlayer?.release()
-            mediaPlayer = null
-        }
+        player.play(record)
     }
 
     private fun checkPermissions() {
@@ -105,7 +70,6 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private fun startRecord() {
-        myRecorder = Recorder(getApplication<Application>())
         val errorMessage: String? = myRecorder.startRecord()
         if (errorMessage != null) makeErrorMessage(errorMessage)
     }
@@ -131,6 +95,7 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         super.onCleared()
         uiScope.cancel()
         myRecorder.releaseRecorder()
+        player.release()
     }
 
     /**

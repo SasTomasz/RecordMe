@@ -62,7 +62,6 @@ class Recorder(val application: Application) {
         recorder?.stop()
         recorder?.release()
         recorder = null
-        record!!.usersName = getDataAndTime()
         return record as Record
     }
 
