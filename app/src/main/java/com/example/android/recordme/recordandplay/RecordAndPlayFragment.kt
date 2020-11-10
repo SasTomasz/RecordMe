@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
 import com.example.android.recordme.adapters.RecordClickListener
@@ -36,7 +36,7 @@ class RecordAndPlayFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this).get(RecordAndPlayViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
 
         // checking if there is need of checking permissions
@@ -126,11 +126,6 @@ class RecordAndPlayFragment : Fragment() {
         )
     }
 
-    // TODO 07 Resolve all warnings and errors:
-    //  - See warnings from build time
-    //  - See warnings in code
-    //  - See warnings in runtime
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -157,3 +152,14 @@ class RecordAndPlayFragment : Fragment() {
 
 
 }
+
+// TODO 13 My response to this article
+//  (https://medium.com/androiddevelopers/viewmodels-and-livedata-patterns-antipatterns-21efaef74a54)
+//  - Try to move from viewModels android* imports
+//  - Try to move from this fragment permission check logic from another place
+//  - Make sure the code in views is ONLY responsible for SHOWING DATA in layout and INFORM
+//      VIEWMODELS ABOUT USER INTERACTIONS
+//  - Expose information about the state of your data using a wrapper or another LiveData
+//      (in viewmodel)
+
+// TODO 14 Try add some motionLayout to your app

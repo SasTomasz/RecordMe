@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Record Me</string>
-    <string name="hello_world">Hello World</string>
     <string name="b_rec">Rec</string>
     <string name="b_stop">Stop</string>
-    <string name="rationale_permissions_dialog_title">We need permisions to record and play sound</string>
+    <string name="rationale_permissions_dialog_title">We need permissions to record and play sound</string>
     <string name="rationale_permissions_dialog_message">We need access to your microphone to record a sound. Write external storage permission is needed to save and play your recorded sound</string>
     <string name="errorMessage1">Another app use Your microphone. Check it out.</string>
 </resources>

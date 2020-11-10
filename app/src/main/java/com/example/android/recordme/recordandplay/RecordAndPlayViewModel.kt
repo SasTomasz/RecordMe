@@ -20,12 +20,15 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     val recordings = repository.recordingsLiveData
     private var record: Record? = null
     private var myRecorder: Recorder = Recorder(getApplication<Application>())
-    private val player: Player = Player(getApplication<Application>())
+
+    // TODO 17 Fix problem with init MediaPlayer:
+    //  E/MediaPlayer-JNI: JNIMediaPlayerFactory: bIsQCMediaPlayerPresent 0
+    private var player: Player = Player(getApplication<Application>())
 
 
     // Coroutines
-    private val viewModeljob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModeljob)
+    private val viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     private val _checkPermissions = MutableLiveData<Boolean>()
     val checkPermissions: LiveData<Boolean>
@@ -45,6 +48,10 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         saveRecordMetadata(record!!)
     }
 
+    private fun startRecord() {
+        val errorMessage: String? = myRecorder.startRecord()
+        if (errorMessage != null) makeErrorMessage(errorMessage)
+    }
 
     fun play(record: Record) {
         player.play(record)
@@ -69,15 +76,6 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
         startRecord()
     }
 
-    private fun startRecord() {
-        val errorMessage: String? = myRecorder.startRecord()
-        if (errorMessage != null) makeErrorMessage(errorMessage)
-    }
-
-    // TODO 06 Refactor viewModel:
-    //  - Move all record and play logic to separate class
-    //      * record logic
-    //      * play logic
 
     private fun saveRecordMetadata(record: Record) {
         uiScope.launch {
@@ -122,3 +120,8 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 //  - Add new button in options menu
 //  - When user click settings in options menu move him to settings activity
 //  - In options menu add feature -> Stop or pause recording when calls income or block income calls
+
+// TODO 19 Resolve "ClassLoader referenced unknown path" and "Before Android 4.1,
+//  method android.graphic.PorterDuffColorFilter..." warnings
+//  - start from https://stackoverflow.com/questions/45044405/classloader-referenced-unknown-path
+//  - find on page "instant Apps support" https://developer.android.com/studio/releases

@@ -6,13 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
+<!--TODO 16 Think about add FragmentContainerView
+        - see https://medium.com/@pavan.careers5208/fragmentcontainerview-c39d8ac376d1
+        - Decide change or not this warning
+        - For now warning is suppress-->
     <fragment
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         app:navGraph="@navigation/navigation"
         app:defaultNavHost="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:ignore="FragmentTagUsage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

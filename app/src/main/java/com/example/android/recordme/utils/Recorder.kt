@@ -9,7 +9,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Recorder(val application: Application) {
+class Recorder(private val application: Application) {
     private lateinit var calendar: Calendar
     private val tag: String = Recorder::class.java.simpleName
     private var recorder: MediaRecorder? = null
@@ -17,28 +17,29 @@ class Recorder(val application: Application) {
 
     private fun prepareRecorder() {
         record = Record(recordPath = getDataAndTime())
-        val audiofile = File(application.filesDir, record!!.recordName)
+        val audioFile = File(application.filesDir, record!!.recordName)
         recorder = MediaRecorder()
 
-        Log.i(tag, "audiofile path: ${audiofile.absolutePath}")
+        Log.i(tag, "audiofile path: ${audioFile.absolutePath}")
 
         recorder?.apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            setOutputFile(audiofile.absolutePath)
+            setOutputFile(audioFile.absolutePath)
         }
 
         try {
             recorder?.prepare()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
-            Log.e(tag, "prepareRcorder() fail")
+            Log.e(tag, "prepareRecorder() fail")
         }
     }
 
     private fun getDataAndTime(): String {
         calendar = Calendar.getInstance()
+        // TODO 18: Resolve this warning
         val data = SimpleDateFormat("yyyy-MM-dd-HH-mm")
         val stringData = data.format(calendar.time)
         Log.i(tag, "string time is: $stringData")
@@ -74,3 +75,8 @@ class Recorder(val application: Application) {
 //  MediaRecorder.prepare()
 //  - If it's possible check it before
 //  - Move error message to that check
+
+// TODO 19 Test app features with phone rotation changes
+//  - Test when user record something
+//  - Test when user play record
+//  - Test how recyclerview behave on landscape

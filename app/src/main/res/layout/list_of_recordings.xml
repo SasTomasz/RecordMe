@@ -36,6 +36,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:text="@{record.recordName}"
+            tools:targetApi="m"
             tools:text="2020-09-04" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
