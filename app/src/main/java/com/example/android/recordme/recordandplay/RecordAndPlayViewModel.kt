@@ -38,6 +38,10 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    private val _isRecording = MutableLiveData<Boolean>(false)
+    val isRecording: LiveData<Boolean>
+        get() = _isRecording
+
 
     fun onClickRecord() {
         checkPermissions()
@@ -45,12 +49,15 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
     fun onClickStop() {
         record = myRecorder.stopRecord()
+        _isRecording.value = false
         saveRecordMetadata(record!!)
     }
 
     private fun startRecord() {
         val errorMessage: String? = myRecorder.startRecord()
-        if (errorMessage != null) makeErrorMessage(errorMessage)
+        if (errorMessage != null) {
+            makeErrorMessage(errorMessage)
+        } else _isRecording.value = true
     }
 
     fun play(record: Record) {
@@ -113,6 +120,9 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
 
 // TODO 09: Upgrade buttons behavior
 //  - Button "STOP" is available only when user record something
+//  - Try to add big round button with red color as it is in record apps (it will be record button)
+//  - When user start recording in UI show stop button instead rec
+//  - Add some animations with motionLayout
 //  - Add some play icon to every item in recycler to inform user there is possibility to play sound
 
 // TODO 10: Add Settings menu:

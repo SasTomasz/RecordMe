@@ -47,6 +47,16 @@ class RecordAndPlayFragment : Fragment() {
             }
         })
 
+        viewModel.isRecording.observe(viewLifecycleOwner, { isRecording ->
+            if (isRecording) {
+                binding.bStop.isEnabled = true
+                binding.bRec.isEnabled = false
+            } else {
+                binding.bStop.isEnabled = false
+                binding.bRec.isEnabled = true
+            }
+        })
+
         // checking if there is need of showing error message
         viewModel.errorMessage.observe(viewLifecycleOwner, { message ->
             message?.let {

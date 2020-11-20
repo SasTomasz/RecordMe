@@ -23,14 +23,14 @@
             android:onClick="@{() -> viewModel.onClickRecord()}"
             android:text="@string/b_rec"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/b_play"
+            app:layout_constraintEnd_toStartOf="@+id/b_stop"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/b_play"
+            android:id="@+id/b_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{() -> viewModel.onClickStop()}"
