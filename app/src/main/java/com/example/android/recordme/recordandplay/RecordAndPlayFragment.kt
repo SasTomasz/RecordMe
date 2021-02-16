@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -47,13 +48,14 @@ class RecordAndPlayFragment : Fragment() {
             }
         })
 
+        // Buttons visibility depending on a recording status
         viewModel.isRecording.observe(viewLifecycleOwner, { isRecording ->
             if (isRecording) {
-                binding.bStop.isEnabled = true
-                binding.bRec.isEnabled = false
+                binding.bStop.visibility = Button.VISIBLE
+                binding.bRec.visibility = Button.GONE
             } else {
-                binding.bStop.isEnabled = false
-                binding.bRec.isEnabled = true
+                binding.bStop.visibility = Button.GONE
+                binding.bRec.visibility = Button.VISIBLE
             }
         })
 

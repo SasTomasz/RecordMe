@@ -118,10 +118,13 @@ class RecordAndPlayViewModel(application: Application) : AndroidViewModel(applic
     }
 }
 
+// TODO 08: Determine MVP
+//  - See other recorder app in Google play (min 3) and thing about pros and cons that app
+//  - Write down what minimum features do you want in this app
+//  - In evernote create new RecordMe folder
+//  - Create inside any notes or draws you need to clearly specify how MVP should look like
+
 // TODO 09: Upgrade buttons behavior
-//  - Button "STOP" is available only when user record something
-//  - Try to add big round button with red color as it is in record apps (it will be record button)
-//  - When user start recording in UI show stop button instead rec
 //  - Add some animations with motionLayout
 //  - Add some play icon to every item in recycler to inform user there is possibility to play sound
 
