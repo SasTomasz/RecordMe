@@ -31,3 +31,5 @@ recording the user can tap it. Long press activate possibility of mark particula
 all of them) and share or delete. 
 
 This is minimum features I thing app must have. I add some concept images.
+
+![image](Concept.jpg)
