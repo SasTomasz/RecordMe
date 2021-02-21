@@ -1,12 +1,7 @@
 package com.example.android.recordme.recordandplay
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -33,11 +26,6 @@ class RecordAndPlayFragment : Fragment() {
         get() = _binding!!
     private lateinit var viewModel: RecordAndPlayViewModel
 
-    private val CHANNEL_ID = "ChannelId"
-    private val CHANNEL_NAME = "ChannelName"
-    private val NOTIFICATION_ID = 0
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,17 +36,6 @@ class RecordAndPlayFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        createNotificationChannel()
-        // TODO D01 Check why notifications don't work
-        val notification = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-            .setContentTitle("Recording Started")
-            .setContentText("You just started recording new audio content")
-            .setSmallIcon(R.drawable.rec_button)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-
-        val notificationManager = NotificationManagerCompat.from(requireContext())
 
         viewModel = ViewModelProvider(this).get(RecordAndPlayViewModel::class.java)
         binding.viewModel = viewModel
@@ -71,14 +48,11 @@ class RecordAndPlayFragment : Fragment() {
             }
         })
 
-        // Buttons visibility and notification depending on a recording status
+        // Buttons visibility depending on a recording status
         viewModel.isRecording.observe(viewLifecycleOwner, { isRecording ->
             if (isRecording) {
                 binding.bStop.visibility = Button.VISIBLE
                 binding.bRec.visibility = Button.GONE
-
-                // show notification
-                notificationManager.notify(NOTIFICATION_ID, notification)
             } else {
                 binding.bStop.visibility = Button.GONE
                 binding.bRec.visibility = Button.VISIBLE
@@ -105,22 +79,6 @@ class RecordAndPlayFragment : Fragment() {
             }
         })
 
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID, CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                lightColor = Color.GREEN
-                enableLights(true)
-            }
-            val manager =
-                activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
-
-        }
     }
 
     /**
