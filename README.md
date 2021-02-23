@@ -4,7 +4,9 @@ course Android Basics Nanodegree by Google. After the course I realized that the
 to still develop is programming apps, resolving real problems myself. So this app is my way to 
 achieve this. I want to build something useful. My goal is to learn how to build a modern android 
 app with architecture standards, and how to put this app in Google Play Store, maintain it in long 
-term, and take care of users. 
+term, and take care of users. If You want to help me to improve this app or showing me better 
+problem solving I'm open to learning something from a smarter developer. I'll be very grateful for 
+Your help.
 
 The main feature is to record audio on demand. In the main activity, the user can see a big rec 
 button. When it clicked recording starts. I want to add some animations for this and for example 
