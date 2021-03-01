@@ -16,6 +16,8 @@ import com.example.android.recordme.R
 import com.example.android.recordme.adapters.MyAdapter
 import com.example.android.recordme.adapters.RecordClickListener
 import com.example.android.recordme.databinding.RecordAndPlayFragmentBinding
+import com.example.android.recordme.utils.makePauseButton
+import com.example.android.recordme.utils.makeRecButton
 
 const val PERMISSIONS_REQUEST_CODE = 123
 
@@ -52,10 +54,14 @@ class RecordAndPlayFragment : Fragment() {
         viewModel.isRecording.observe(viewLifecycleOwner, { isRecording ->
             if (isRecording) {
                 binding.bStop.visibility = Button.VISIBLE
-                binding.bRec.visibility = Button.GONE
+                binding.bPlay.visibility = Button.VISIBLE
+//                binding.bPause.visibility = Button.VISIBLE
+                makePauseButton(binding.bRec)
             } else {
                 binding.bStop.visibility = Button.GONE
-                binding.bRec.visibility = Button.VISIBLE
+                binding.bPlay.visibility = Button.GONE
+//                binding.bPause.visibility = Button.GONE
+                makeRecButton(binding.bRec)
             }
         })
 
